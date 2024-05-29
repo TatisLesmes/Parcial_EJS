@@ -37,11 +37,73 @@
         </table>
 
 
+        //filtrar
+
+        <div id="filter-area">
+            <label for="homeworld-filter">Homeworld:</label>
+            <select id="homeworld-filter">
+                <option value="">All</option>
+            </select>
+        
+            <label for="species-filter">Species:</label>
+            <select id="species-filter">
+                <option value="">All</option>
+            </select>
+        </div>
+        
+
+
+
         <script>
             document.querySelector('#boton').addEventListener('click', function() {
                 fetch('/data.json')
                 .then(response => response.json())
                 .then(data => {
+
+
+
+
+                    let homeworldFilter = document.getElementById('homeworld-filter');
+                    let speciesFilter = document.getElementById('species-filter');
+                   // const res = document.querySelector('#res');
+
+
+                    // Población de los selectores de filtro
+                    let homeworlds = [...new Set(data.map(item => item.homeworld))];
+                    let species = [...new Set(data.map(item => item.species))];
+
+
+                    homeworlds.forEach(homeworld => {
+                        const option = document.createElement('option');
+                        option.value = homeworld;
+                        option.textContent = homeworld;
+                        homeworldFilter.appendChild(option);
+                    });
+
+                    species.forEach(species => {
+                        const option = document.createElement('option');
+                        option.value = species;
+                        option.textContent = species;
+                        speciesFilter.appendChild(option);
+                    });
+
+                    function filterData() {
+                        const selectedHomeworld = homeworldFilter.value;
+                        const selectedSpecies = speciesFilter.value;
+
+                        const filteredData = data.filter(item => {
+                            return (selectedHomeworld === "" || item.homeworld === selectedHomeworld) &&
+                                (selectedSpecies === "" || item.species === selectedSpecies);
+                        });
+
+
+                    displayData(filteredData);
+                    }
+
+                    function displayData(dataToDisplay) {
+
+
+
                     let res = document.querySelector('#res');
                     res.innerHTML = '';
                     data.forEach(item => {
@@ -60,6 +122,16 @@
                             </tr>
                         `;
                     });
+                }
+
+                    homeworldFilter.addEventListener('change', filterData);
+                    speciesFilter.addEventListener('change', filterData);
+
+                    // Inicializar la vista con todos los personajes
+                    displayData(data);
+
+
+
                 })
                 .catch(error => {
                     console.error('Error al obtener los datos:', error);
@@ -69,7 +141,7 @@
 
 
 
-               
+              
 
 
 
