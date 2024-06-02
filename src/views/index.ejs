@@ -8,11 +8,38 @@
 
 <body>
     <%- include('./templates/navigation.ejs') %>
-  <h1>Bienvenido</h1>
+  <h1>Tablas</h1>
 
 
   <input type="submit" value="Lista_StarWar-Dar_clic" class="btn btn-dark" id="boton" >
 
+
+<!-- Formulario de búsqueda por nombre -->
+<form id="search-form">
+    <label for="character-name">Nombre del personaje:</label>
+    <input type="text" id="character-name" name="characterName">
+    <input type="button" value="Buscar" class="btn btn-dark" id="BuscarBoton" >
+  
+</form>
+
+
+
+
+
+  <div id="filter-area">
+      <label for="homeworld-filter">Homeworld:</label>
+      <select id="homeworld-filter">
+          <option value="">All</option>
+      </select>
+  
+      <label for="species-filter">Species:</label>
+      <select id="species-filter">
+          <option value="">All</option>
+      </select>
+
+
+
+  </div>
 
         <h1>Lista </h1>
 
@@ -36,32 +63,12 @@
 
         </table>
 
-
-        //filtrar
-
-        <div id="filter-area">
-            <label for="homeworld-filter">Homeworld:</label>
-            <select id="homeworld-filter">
-                <option value="">All</option>
-            </select>
         
-            <label for="species-filter">Species:</label>
-            <select id="species-filter">
-                <option value="">All</option>
-            </select>
-        </div>
-        
-
-
-
         <script>
             document.querySelector('#boton').addEventListener('click', function() {
                 fetch('/data.json')
                 .then(response => response.json())
                 .then(data => {
-
-
-
 
                     let homeworldFilter = document.getElementById('homeworld-filter');
                     let speciesFilter = document.getElementById('species-filter');
@@ -102,11 +109,11 @@
 
                     function displayData(dataToDisplay) {
 
-
-
                     let res = document.querySelector('#res');
                     res.innerHTML = '';
-                    data.forEach(item => {
+                    dataToDisplay.forEach(item =>{
+
+                  //  data.forEach(item => {
                         res.innerHTML += `
                             <tr>
                                 <td>${item.name}</td>
@@ -131,25 +138,70 @@
                     displayData(data);
 
 
-
                 })
                 .catch(error => {
                     console.error('Error al obtener los datos:', error);
                 });
             });
+        
+
+    
+// Asignar eventos a los elementos de la página
+document.querySelector('#BuscarBoton').addEventListener('click', function(){
+   
+   // Obtener el nombre del personaje ingresado en el campo de búsqueda
+   const characterName = document.getElementById('character-name').value.toLowerCase().trim();
+
+   // Si el campo de búsqueda está vacío, no hacer nada
+   if (characterName === "") {
+       return;
+   }
+  
+  
+       fetch('/data.json')
+               .then(response => response.json())
+               .then(data => {
+
+                   let character = data.find(character => character.name.toLowerCase() === characterName);
+
+// Mostrar el resultado de la búsqueda en la tabla
+         let res = document.querySelector('#res');
+       res.innerHTML = ''; // Limpiar la tabla antes de mostrar el resultado
+
+       if (character) {
+           res.innerHTML += `
+               <tr>
+                   <td>${character.name}</td>
+                   <td>${character.height}</td>
+                   <td>${character.mass}</td>
+                   <td>${character.hair_color}</td>
+                   <td>${character.skin_color}</td>
+                   <td>${character.eye_color}</td>
+                   <td>${character.birth_year}</td>
+                   <td>${character.gender}</td>
+                   <td>${character.homeworld}</td>
+                   <td>${character.species}</td>
+               </tr>
+           `;
+       } else {
+           res.innerHTML += '<tr><td colspan="10">Personaje no encontrado</td></tr>';
+       }
+   })
+   .catch(error => {
+       console.error('Error al buscar el personaje:', error);
+   });
+});
+
+
+
+
             </script>
 
 
 
-              
-
-
-
-
-
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<%-include('./templates/footer.ejs')%>
+    
+        <%-include('./templates/footer.ejs')%>
 
 
 </body>

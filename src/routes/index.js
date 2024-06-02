@@ -17,9 +17,42 @@ router.get('/', (req, res) => {
 
 
 
+router.get('/filtro', (req, res) => {
+    res.render('filtro.ejs', { data });
+});
+
 
 router.get('/data.json', (req, res) => {
     res.json(data);
+});
+
+
+
+//filtro
+router.post('/', (req, res) => {
+    const { homeworld, species } = req.body;
+
+    // Aplicar el filtro a tus datos aquí
+    const filteredData = data.filter(item => {
+        return (homeworld === "" || item.homeworld === homeworld) &&
+            (species === "" || item.species === species);
+    });
+
+
+    res.json(filteredData);
+});
+
+
+// Ruta para manejar la búsqueda por nombre de personaje
+router.post('/', (req, res) => {
+    const characterName = req.body.characterName.toLowerCase().trim();
+
+    const character = data.find(item=> character.name.toLowerCase() === characterName);
+    if (character) {
+        res.json(character);
+    } else {
+        res.status(404).json({ error: 'Personaje no encontrado' });
+    }
 });
 
 

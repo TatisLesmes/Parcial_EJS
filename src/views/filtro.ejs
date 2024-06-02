@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%-include('./templates/header.ejs')%>
+
+    <title>Tarjetas</title>
+</head>
+<body>
+    <%- include('./templates/navigation.ejs') %>
+    <h1>Tarjetas</h1>
+
+
+        
+
+<!-- Formulario de búsqueda por nombre -->
+<form id="search-form">
+    <label for="character-name">Nombre del personaje:</label>
+    <input type="text" id="character-name" name="characterName">
+    <input type="button" value="Buscar" class="btn btn-dark" id="BuscarBoton" >
+  
+</form>
+
+
+  <div id="filter-area">
+      <label for="homeworld-filter">Homeworld:</label>
+      <select id="homeworld-filter">
+          <option value="">All</option>
+      </select>
+  
+      <label for="species-filter">Species:</label>
+      <select id="species-filter">
+          <option value="">All</option>
+      </select>
+  </div>
+
+  <div id="card-container" class="card-container row"></div>
+
+<br>
+<br>
+    
+    
+
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar datos y configurar filtros
+            fetch('/data.json')
+                .then(response => response.json())
+                .then(data => {
+                    let homeworldFilter = document.getElementById('homeworld-filter');
+                    let speciesFilter = document.getElementById('species-filter');
+
+                    let homeworlds = [...new Set(data.map(item => item.homeworld))];
+                    let species = [...new Set(data.map(item => item.species))];
+
+                    homeworlds.forEach(homeworld => {
+                        const option = document.createElement('option');
+                        option.value = homeworld;
+                        option.textContent = homeworld;
+                        homeworldFilter.appendChild(option);
+                    });
+
+                    species.forEach(species => {
+                        const option = document.createElement('option');
+                        option.value = species;
+                        option.textContent = species;
+                        speciesFilter.appendChild(option);
+                    });
+
+                    function filterData() {
+                        const selectedHomeworld = homeworldFilter.value;
+                        const selectedSpecies = speciesFilter.value;
+
+                        const filteredData = data.filter(item => {
+                            return (selectedHomeworld === "" || item.homeworld === selectedHomeworld) &&
+                                   (selectedSpecies === "" || item.species === selectedSpecies);
+                        });
+
+                        displayData(filteredData);
+                    }
+
+                    function displayData(dataToDisplay) {
+                        let res = document.querySelector('#card-container');
+                        res.innerHTML = '';
+                        dataToDisplay.forEach(item => {
+                            res.innerHTML += `
+                                <div class="card m-3" style="width: 18rem;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${item.name}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">${item.species}</h6>
+                                        <p class="card-text">
+                                            <strong>Height:</strong> ${item.height} cm<br>
+                                            <strong>Mass:</strong> ${item.mass} kg<br>
+                                            <strong>Hair Color:</strong> ${item.hair_color}<br>
+                                            <strong>Skin Color:</strong> ${item.skin_color}<br>
+                                            <strong>Eye Color:</strong> ${item.eye_color}<br>
+                                            <strong>Birth Year:</strong> ${item.birth_year}<br>
+                                            <strong>Gender:</strong> ${item.gender}<br>
+                                            <strong>Homeworld:</strong> ${item.homeworld}<br>
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    homeworldFilter.addEventListener('change', filterData);
+                    speciesFilter.addEventListener('change', filterData);
+
+                    // Inicializar la vista con todos los personajes
+                    displayData(data);
+                })
+                .catch(error => {
+                    console.error('Error al obtener los datos:', error);
+                });
+
+            // Buscar personaje por nombre
+            document.querySelector('#BuscarBoton').addEventListener('click', function() {
+                const characterName = document.getElementById('character-name').value.toLowerCase().trim();
+                if (characterName === "") {
+                    return;
+                }
+
+                fetch('/data.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        let character = data.find(character => character.name.toLowerCase() === characterName);
+                        const res = document.querySelector('#card-container');
+                        res.innerHTML = '';
+                        
+                        if (character) {
+                            res.innerHTML += `
+                                <div class="card m-3" style="width: 18rem;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${character.name}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">${character.species}</h6>
+                                        <p class="card-text">
+                                            <strong>Height:</strong> ${character.height} cm<br>
+                                            <strong>Mass:</strong> ${character.mass} kg<br>
+                                            <strong>Hair Color:</strong> ${character.hair_color}<br>
+                                            <strong>Skin Color:</strong> ${character.skin_color}<br>
+                                            <strong>Eye Color:</strong> ${character.eye_color}<br>
+                                            <strong>Birth Year:</strong> ${character.birth_year}<br>
+                                            <strong>Gender:</strong> ${character.gender}<br>
+                                            <strong>Homeworld:</strong> ${character.homeworld}<br>
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            res.innerHTML = '<p>Personaje no encontrado</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al buscar el personaje:', error);
+                    });
+            });
+        });
+    </script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+<%-include('./templates/footer.ejs')%>
+
+
+
+
+</body>
+</html>
